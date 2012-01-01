@@ -77,7 +77,7 @@ class MineField:
                 mc = "{0}".format(md.get(mv,mv)).center(cw)
                 cv = self.covers[x][y]
                 if cv == 2:
-                    mc = '⚐'.center(cw)
+                    mc = '⚑'.center(cw)
                 elif cv == 1:
                     mc = '_'.center(cw)
 
