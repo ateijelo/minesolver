@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import itertools
+import random
 
 #a set of mines...
 
@@ -168,6 +169,13 @@ class MineField:
                 if self.uncovered(x,y) and self.mines[x][y] > 0:
                     yield x,y
 
+    def neighbour_mines_left(self,x,y):
+        r = self.value(x,y)
+        for nx,ny in self.neighbours(x,y):
+            if self.flagged(nx,ny):
+                r -= 1
+        return r
+
     def value(self,x,y):
         return self.mines[x][y]
 
@@ -179,14 +187,18 @@ def valid(sol,board,cells):
     for c in cells:
         d[c] = 0
     for mx,my in sol:
+        #print("mx,my:",mx,my)
         for cx,cy in cells:
+            #print("cx,cy:",cx,cy)
             if cx==mx and cy==my:
                 continue
             if abs(cx-mx) in (1,0,-1) and abs(cy-my) in (1,0,-1):
                 d[(cx,cy)] += 1
+        #print(d)
 
     for cx,cy in d:
-        if d[(cx,cy)] != board.value(cx,cy):
+        #print("neighbour_mines_left({0},{1}): {2}".format(cx,cy,board.neighbour_mines_left(cx,cy)))
+        if d[(cx,cy)] != board.neighbour_mines_left(cx,cy):
             return False
     return True
 
@@ -207,7 +219,7 @@ def advance(board):
     first = True
     for nx,ny in board.uncovered_numbers():
         cells.add((nx,ny))
-        cellsols = itertools.combinations(board.covered_unflagged_neighbours(nx,ny),board.value(nx,ny))
+        cellsols = itertools.combinations(board.covered_unflagged_neighbours(nx,ny),board.neighbour_mines_left(nx,ny))
         newsols = set()
         for c in cellsols:
             for a in allsols:
@@ -217,19 +229,73 @@ def advance(board):
         allsols = newsols
         #print("cells:",cells)
         #print("allsols:",allsols)
+        #for sol in allsols:
+        #    printsol(sol,board)
         validsols = set(s for s in allsols if valid(s,board,cells))
-        print("validsols:",validsols)
-        for sol in validsols:
-            printsol(sol,board)
+        #print("validsols:",validsols)
+        #for sol in validsols:
+        #    printsol(sol,board)
         allsols = validsols
+    edge = set()
+    for nx,ny in board.uncovered_numbers():
+        for cx,cy in board.covered_unflagged_neighbours(nx,ny):
+            edge.add((cx,cy))
+    mines = set()
+    spaces = set()
+    for x,y in edge:
+        count = 0
+        for sol in allsols:
+            if (x,y) in sol:
+                count += 1
+        if count == len(allsols):
+            mines.add((x,y))
+        elif count == 0:
+            spaces.add((x,y))
+    return mines,spaces
+
+def solve(board):
+    while board.minesleft() > 0:
+        mines,spaces = advance(board)
+        if len(mines) == len(spaces) == 0:
+            return False
+        for x,y in mines:
+            board.flag(x,y)
+        for x,y in spaces:
+            board.uncover(x,y)
+    else:
+        return True
+
+def generate(width,height,minecount,start):
+    s = set(itertools.product(range(width),range(height)))
+    x,y = start
+    for dx,dy in itertools.product((-1,0,1),repeat=2):
+        s.difference_update(((x+dx,y+dy),))
+    mines = set(random.sample(s,minecount))
+    b = MineField(width,height,mines)
+    b.uncover(x,y)
+    return b
 
 if __name__=="__main__":
-    b = MineField(8,8,set(((0,3),(1,6),(2,0),(2,2),(3,5),(4,1),(4,6),(5,3),(6,1),(7,5))))
+    while True:
+        print("Generating...")
+        b = generate(7,7,24,(3,3))
+        print("Trying to solve... ")
+        if solve(b):
+            print(b)
+            break
+        print("Unsolvable:")
+        print(b)
+    #b = MineField(8,8,set(((0,3),(1,6),(2,0),(2,2),(3,5),(4,1),(4,6),(5,3),(6,1),(7,5))))
     #b = MineField(8,8,set(((0,3),(1,6),(2,0),(2,2),(3,5),(4,1),(4,6),(7,5))))
     #b.leftclick(7,3)
-    b.leftclick(7,7)
-    print(b)
-    advance(b)
+    #b.uncover(0,0)
+    #b.uncover(7,7)
+    #b.uncover(6,5)
+    #b.uncover(5,5)
+    #b.uncover(4,5)
+    #b.flag(7,5)
+    #print(valid(((6,4),(3,4),(3,5)),b,((4,5),(5,5),(6,5))))
+    #print(advance(b))
     #import pdb
     #pdb.set_trace()
     #print("Sol:",((4,6),(7,5)))
