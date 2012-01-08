@@ -59,19 +59,77 @@ class MineField:
             for x in range(self.w):
                 if x==0:
                     if y==self.h-1:
-                        s += '┌'
+                        if self.covered(x,y):
+                            s += '┏'
+                        else:
+                            s += '┌'
                     else:
-                        s += '├'
+                        t = (self.covered(x,y+1),
+                             self.covered(x,y))
+                        d = {(True,True):'┣',
+                             (True,False):'┡',
+                             (False,True):'┢',
+                             (False,False):'├'}
+                        s += d[t]
                 if x==self.w-1:
                     if y==self.h-1:
-                        s += '─'*cw+'┐'
+                        if self.covered(x,y):
+                            s += '━'*cw+'┓'
+                        else:
+                            s += '─'*cw+'┐'
                     else:
-                        s += '─'*cw+'┤'
+                        if self.covered(x,y) or\
+                           self.covered(x,y+1):
+                            s += '━'*cw
+                        else:
+                            s += '─'*cw
+                        t = (self.covered(x,y+1),
+                             self.covered(x,y))
+                        d = {(True,True):'┫',
+                             (True,False):'┩',
+                             (False,True):'┪',
+                             (False,False):'┤'}
+                        s += d[t]
                 else:
                     if y==self.h-1:
-                        s += '─'*cw+'┬'
+                        if self.covered(x,y):
+                            s += '━'*cw
+                        else:
+                            s += '─'*cw
+                        t = (self.covered(x,y),
+                             self.covered(x+1,y))
+                        d = {(True,True):'┳',
+                             (True,False):'┱',
+                             (False,True):'┲',
+                             (False,False):'┬'}
+                        s += d[t]
                     else:
-                        s += '─'*cw+'┼'
+                        if self.covered(x,y) or\
+                           self.covered(x,y+1):
+                            s += '━'*cw
+                        else:
+                            s += '─'*cw
+                        t = (1 if self.covered(x,y) else 0,
+                             1 if self.covered(x+1,y) else 0,
+                             1 if self.covered(x,y+1) else 0,
+                             1 if self.covered(x+1,y+1) else 0)
+                        d = {(1,1,1,1):'╋',
+                             (1,1,1,0):'╋',
+                             (1,1,0,1):'╋',
+                             (1,1,0,0):'╈',
+                             (1,0,1,1):'╋',
+                             (1,0,1,0):'╉',
+                             (1,0,0,1):'╋',
+                             (1,0,0,0):'╅',
+                             (0,1,1,1):'╋',
+                             (0,1,1,0):'╋',
+                             (0,1,0,1):'╊',
+                             (0,1,0,0):'╆',
+                             (0,0,1,1):'╇',
+                             (0,0,1,0):'╃',
+                             (0,0,0,1):'╄',
+                             (0,0,0,0):'┼'}
+                        s += d[t]
             s += '\n'
             for x in range(self.w):
                 mv = self.mines[x][y]
@@ -80,19 +138,41 @@ class MineField:
                 if cv == 2:
                     mc = '⚑'.center(cw)
                 elif cv == 1:
-                    mc = '_'.center(cw)
+                    mc = ' '.center(cw)
 
                 if x==0:
-                    s += '│'
-                s += mc + '│'
+                    s += '┃' if self.covered(x,y) else '│'
+                if x==self.w-1:
+                    s += mc + ('┃' if self.covered(x,y) else '│')
+                else:
+                    s += mc + ('┃' if self.covered(x,y) or
+                                  self.covered(x+1,y) else '│')
             s += '\n'
+        # last line
         for x in range(self.w):
             if x==0:
-                s += '└'
+                if self.covered(x,0):
+                    s += '┗'
+                else:
+                    s += '└'
             if x==self.w-1:
-                s += '─'*cw+'┘'
+                if self.covered(x,0):
+                    s += '━'*cw+'┛'
+                else:
+                    s += '─'*cw+'┘'
             else:
-                s += '─'*cw+'┴'
+                if self.covered(x,0):
+                    s += '━'*cw
+                    if self.covered(x+1,0):
+                        s += '┻'
+                    else:
+                        s += '┹'
+                else:
+                    s += '─'*cw
+                    if self.covered(x+1,0):
+                        s += '┺'
+                    else:
+                        s += '┴'
         return s
 
     def neighbours(self,x,y):
@@ -197,7 +277,6 @@ def valid(sol,board,cells):
         #print(d)
 
     for cx,cy in d:
-        #print("neighbour_mines_left({0},{1}): {2}".format(cx,cy,board.neighbour_mines_left(cx,cy)))
         if d[(cx,cy)] != board.neighbour_mines_left(cx,cy):
             return False
     return True
@@ -278,7 +357,7 @@ def generate(width,height,minecount,start):
 if __name__=="__main__":
     while True:
         print("Generating...")
-        b = generate(7,7,24,(3,3))
+        b = generate(8,8,10,(3,3))
         print("Trying to solve... ")
         if solve(b):
             print(b)
