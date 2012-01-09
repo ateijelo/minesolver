@@ -95,7 +95,7 @@ class MineField:
                         if self.covered(x,y):
                             s += '━'*cw
                         else:
-                            s += ' '*cw
+                            s += '─'*cw
                         t = (self.covered(x,y),
                              self.covered(x+1,y))
                         d = {(True,True):'┳',
@@ -141,9 +141,9 @@ class MineField:
                     mc = ' '.center(cw)
 
                 if x==0:
-                    s += '┃' if self.covered(x,y) else ' '
+                    s += '┃' if self.covered(x,y) else '│'
                 if x==self.w-1:
-                    s += mc + ('┃' if self.covered(x,y) else ' ')
+                    s += mc + ('┃' if self.covered(x,y) else '│')
                 else:
                     s += mc + ('┃' if self.covered(x,y) or
                                   self.covered(x+1,y) else ' ')
@@ -172,7 +172,7 @@ class MineField:
                     if self.covered(x+1,0):
                         s += '┺'
                     else:
-                        s += '┴'
+                        s += '─'
         return s
 
     def neighbours(self,x,y):
@@ -355,26 +355,30 @@ def generate(width,height,minecount,start):
     return b
 
 if __name__=="__main__":
-    while True:
-        print("Generating...")
-        b = generate(8,8,10,(3,3))
-        print("Trying to solve... ")
-        if solve(b):
-            print(b)
-            break
-        print("Unsolvable:")
-        print(b)
-    #b = MineField(8,8,set(((0,3),(1,6),(2,0),(2,2),(3,5),(4,1),(4,6),(5,3),(6,1),(7,5))))
+    #while True:
+    #    print("Generating...")
+    #    b = generate(8,8,10,(3,3))
+    #    print("Trying to solve... ")
+    #    if solve(b):
+    #        print(b)
+    #        break
+    #    print("Unsolvable:")
+    #    print(b)
+    b = MineField(8,8,set(((0,3),(1,6),(2,0),(2,2),(3,5),(4,1),(4,6),(5,3),(6,1),(7,5))))
     #b = MineField(8,8,set(((0,3),(1,6),(2,0),(2,2),(3,5),(4,1),(4,6),(7,5))))
-    #b.leftclick(7,3)
-    #b.uncover(0,0)
-    #b.uncover(7,7)
+    print(b)
+    b.uncover(7,7)
+    mines,spaces = advance(b)
+    for x,y in mines:
+        b.flag(x,y)
+    for x,y in spaces:
+        b.uncover(x,y)
+    print(b)
     #b.uncover(6,5)
     #b.uncover(5,5)
     #b.uncover(4,5)
     #b.flag(7,5)
     #print(valid(((6,4),(3,4),(3,5)),b,((4,5),(5,5),(6,5))))
-    #print(advance(b))
     #import pdb
     #pdb.set_trace()
     #print("Sol:",((4,6),(7,5)))
