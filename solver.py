@@ -27,6 +27,10 @@ class UserBoard:
     def minesleft(self):
         return self._minecount - self.flagcount
 
+    def set(self,x,y,n):
+        self.mines[x][y] = n
+        self.covers[x][y] = 0
+
     def __str__(self):
         s = ""
         md = {-1:'■',0:' '} # mine dict
