@@ -441,9 +441,7 @@ class MineField:
                         self.covers[nx][ny] = 0
                         finish = False
             if finish:
-                print("ya")
                 break
-            print("todavía")
 
     def uncovered_numbers(self):
         for y in range(self.h):
@@ -569,7 +567,7 @@ if __name__=="__main__":
     #b = MineField(8,8,set(((0,3),(1,6),(2,0),(2,2),(3,5),(4,1),(4,6),(5,3),(6,1),(7,5))))
     #b = generate(15,15,30,(0,0))
     #b.uncover(7,7)
-    print(b)
+    #print(b)
     #b = MineField(8,8,set(((0,3),(1,6),(2,0),(2,2),(3,5),(4,1),(4,6),(7,5))))
     #print(b)
     #b.uncover(7,7)
