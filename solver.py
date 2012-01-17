@@ -559,6 +559,7 @@ def generate(width,height,minecount,start):
     return b
 
 if __name__=="__main__":
+    #test
     while True:
         print("Generating...")
         b = generate(8,8,10,(0,0))
